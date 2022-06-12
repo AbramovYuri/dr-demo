@@ -9,7 +9,8 @@
 <audio autoplay loop preload="auto" src="https://abramovyuri.github.io/dr-demo/Suha_Pyramids.mp3"></audio>
 
 <div class="universe demo-screen">
-    <canvas id="canvas"></canvas>
+    <canvas id='canvas' class="visible"></canvas>
+    <canvas id='canvas3D'></canvas>
 </div>
 <div class="letters-container"></div>
 
@@ -156,6 +157,55 @@
 
     Alchemist - реставрация игр, код
 </div>
+
+<script id='vertex-shader' type='x-shader/x-vertex'>
+    precision mediump float;
+
+    attribute vec2 a_position;
+
+    void main() {
+        gl_Position = vec4(a_position, 0, 1);
+    }
+
+</script>
+
+
+<script id='fragment-shader' type='x-shader/x-fragment'>
+    precision mediump float;
+
+    uniform sampler2D u_texture;
+    uniform float u_time;
+    uniform vec2 u_canvas_size;
+
+    void main() {
+
+    //vec2 u_canvas_size2 = vec2(1000., 1000.);
+
+    vec2 uv = (gl_FragCoord.xy - u_canvas_size.xy*0.5)/u_canvas_size.y;
+    uv += vec2(.2 * sin(u_time / 2.), .3 * cos(u_time / 3.));
+    vec3 col = vec3(0);
+
+    float phi = atan(uv.y, uv.x);
+    float rho = length(uv);
+
+    float pi = 3.1415926;
+
+    vec2 st = vec2(phi / pi * 2., 0.25 / rho);
+
+    st.y += u_time / 2.;
+    st.x += u_time / 12.;
+
+    col += texture2D(u_texture, st).rgb;
+    col *= rho + 0.15;
+    //col += 0.1 / rho * vec3(0.1, 0.1, 0.4);
+
+    gl_FragColor = vec4(col,1.0);
+
+    //  gl_FragColor = texture2D(u_texture, gl_FragCoord.xy / u_canvas_size);
+    }
+
+</script>
+
 <script src="./universe.js"></script>
 
 </body>
